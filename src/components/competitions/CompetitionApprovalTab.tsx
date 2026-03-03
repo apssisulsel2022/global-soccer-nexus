@@ -27,14 +27,27 @@ export default function CompetitionApprovalTab() {
     try {
       const { data, error } = await supabase
         .from("competitions")
-        .select(`
-          *,
-          creator:profiles!competitions_created_by_fkey(full_name, email)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setCompetitions(data || []);
+
+      // Fetch creator profiles separately
+      const creatorIds = [...new Set((data || []).map((c: any) => c.created_by).filter(Boolean))];
+      let profilesMap: Record<string, any> = {};
+      if (creatorIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", creatorIds);
+        profiles?.forEach((p: any) => { profilesMap[p.id] = p; });
+      }
+
+      const enriched = (data || []).map((c: any) => ({
+        ...c,
+        creator: c.created_by ? profilesMap[c.created_by] || null : null,
+      }));
+      setCompetitions(enriched);
     } catch (error: any) {
       toast({
         variant: "destructive",
