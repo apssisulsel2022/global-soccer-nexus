@@ -132,7 +132,7 @@ const EPlayerCards = () => {
                 className="flex-none"
                 style={{ animationDelay: `${i * 50}ms` }}
               >
-                <div className="animate-fade-in">
+                <div className="animate-fade-in cursor-pointer" onClick={() => navigate(`/e-player-cards/${player.id}`)}>
                   <EPlayerCard player={player} />
                 </div>
               </div>
