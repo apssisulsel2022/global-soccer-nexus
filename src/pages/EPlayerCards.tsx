@@ -146,8 +146,9 @@ const EPlayerCards = () => {
             {filtered.map((player: any, i: number) => (
               <div
                 key={player.id}
-                className="animate-fade-in"
+                className="animate-fade-in cursor-pointer"
                 style={{ animationDelay: `${i * 60}ms` }}
+                onClick={() => navigate(`/e-player-cards/${player.id}`)}
               >
                 <EPlayerCard player={player} />
               </div>
