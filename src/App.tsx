@@ -47,6 +47,7 @@ import PublicPlayerDetailPage from "./components/public/PublicPlayerDetailPage";
 import PublicCompetitionDetailPage from "./pages/PublicCompetitionDetailPage";
 import InstallApp from "./pages/InstallApp";
 import EPlayerCards from "./pages/EPlayerCards";
+import EPlayerCardDetail from "./pages/EPlayerCardDetail";
 
 const queryClient = new QueryClient({
   defaultOptions: {
