@@ -108,9 +108,8 @@ export function AppSidebar() {
     }
     
     if (isPanitia) {
-      // Panitia can see: dashboard, competitions, matches, stadiums
       return menuItems.filter(item => 
-        ["/", "/competitions", "/matches", "/stadiums"].includes(item.url)
+        ["/", "/competitions", "/matches", "/stadiums", "/ticket-sales"].includes(item.url)
       );
     }
     
