@@ -44,6 +44,7 @@ const menuItems = [
   { title: "Wasit", url: "/referees", icon: Gavel },
   { title: "Stadion", url: "/stadiums", icon: Building2 },
   { title: "E-Player Card", url: "/e-player-cards", icon: CreditCard },
+  { title: "Penjualan Tiket", url: "/ticket-sales", icon: Ticket },
 ];
 
 const adminMenuItems = [
