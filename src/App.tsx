@@ -48,6 +48,8 @@ import PublicCompetitionDetailPage from "./pages/PublicCompetitionDetailPage";
 import InstallApp from "./pages/InstallApp";
 import EPlayerCards from "./pages/EPlayerCards";
 import EPlayerCardDetail from "./pages/EPlayerCardDetail";
+import TicketSales from "./pages/TicketSales";
+import PublicTicketPurchasePage from "./pages/PublicTicketPurchasePage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
