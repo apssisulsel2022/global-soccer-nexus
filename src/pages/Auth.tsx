@@ -105,18 +105,19 @@ const Auth = () => {
 
       if (error) throw error;
 
-      // Update profile with phone number after signup
+      // Upsert profile with phone number after signup
       if (data.user) {
         const { error: profileError } = await supabase
           .from("profiles")
-          .update({
+          .upsert({
+            id: data.user.id,
+            email: email,
             full_name: fullName,
             phone: phone,
-          })
-          .eq("id", data.user.id);
+          }, { onConflict: "id" });
 
         if (profileError) {
-          console.error("Error updating profile:", profileError);
+          console.error("Error upserting profile:", profileError);
         }
 
         // Create role request if a role was selected
