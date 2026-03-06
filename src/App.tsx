@@ -74,6 +74,7 @@ const App = () => (
             <Route path="/public/clubs/:id" element={<PublicClubDetailPage />} />
             <Route path="/public/players/:id" element={<PublicPlayerDetailPage />} />
             <Route path="/public/competitions/:id" element={<PublicCompetitionDetailPage />} />
+            <Route path="/public/tickets" element={<PublicTicketPurchasePage />} />
             <Route path="/install" element={<InstallApp />} />
             
             {/* Auth Routes */}
