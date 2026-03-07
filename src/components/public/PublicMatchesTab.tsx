@@ -12,6 +12,83 @@ import { id } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+const MatchCard = ({ match, isLive = false }: { match: any; isLive?: boolean }) => {
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, { variant: any; label: string; className?: string }> = {
+      scheduled: { variant: "outline", label: "Dijadwalkan" },
+      live: { variant: "default", label: "🔴 LIVE", className: "animate-pulse" },
+      finished: { variant: "secondary", label: "Selesai" },
+      postponed: { variant: "destructive", label: "Ditunda" },
+      cancelled: { variant: "destructive", label: "Dibatalkan" },
+    };
+    const config = variants[status] || { variant: "outline", label: status };
+    return <Badge variant={config.variant} className={config.className}>{config.label}</Badge>;
+  };
+
+  return (
+    <Card className={`hover:shadow-md transition-shadow ${isLive ? 'border-primary' : ''}`}>
+      <CardContent className="p-4">
+        {/* Header: competition name + status */}
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-sm font-medium text-muted-foreground truncate">
+            {match.competition?.name}
+          </span>
+          {getStatusBadge(match.status)}
+        </div>
+
+        {/* Date & Venue */}
+        <div className="text-sm text-muted-foreground mb-3 space-y-1">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-3 w-3 shrink-0" />
+            <span className="truncate">
+              {format(new Date(match.match_date), "EEE, d MMM yyyy - HH:mm", { locale: id })} WIB
+            </span>
+          </div>
+          {match.venue && (
+            <div className="flex items-center gap-2">
+              <MapPin className="h-3 w-3 shrink-0" />
+              <span className="truncate">{match.venue}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Teams & Score - Mobile responsive */}
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Link to={`/public/clubs/${match.home_club?.id}`} className="flex items-center gap-2 flex-1 min-w-0 hover:opacity-80">
+            <Avatar className="h-8 w-8 shrink-0">
+              <AvatarImage src={match.home_club?.logo_url || ""} alt={match.home_club?.name} />
+              <AvatarFallback className="text-xs">{match.home_club?.name?.substring(0, 2)}</AvatarFallback>
+            </Avatar>
+            <span className="font-medium truncate text-sm sm:text-base">
+              {match.home_club?.short_name || match.home_club?.name}
+            </span>
+          </Link>
+          
+          <div className="text-center shrink-0 min-w-[60px]">
+            {match.status === "finished" || match.status === "live" ? (
+              <div className="text-xl sm:text-2xl font-bold">
+                {match.home_score} - {match.away_score}
+              </div>
+            ) : (
+              <div className="text-lg font-medium text-muted-foreground">vs</div>
+            )}
+          </div>
+          
+          <Link to={`/public/clubs/${match.away_club?.id}`} className="flex items-center gap-2 flex-1 min-w-0 justify-end hover:opacity-80">
+            <span className="font-medium truncate text-sm sm:text-base text-right">
+              {match.away_club?.short_name || match.away_club?.name}
+            </span>
+            <Avatar className="h-8 w-8 shrink-0">
+              <AvatarImage src={match.away_club?.logo_url || ""} alt={match.away_club?.name} />
+              <AvatarFallback className="text-xs">{match.away_club?.name?.substring(0, 2)}</AvatarFallback>
+            </Avatar>
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 export const PublicMatchesTab = () => {
   const [competitions, setCompetitions] = useState<any[]>([]);
   const [selectedCompetition, setSelectedCompetition] = useState<string>("all");
@@ -24,32 +101,11 @@ export const PublicMatchesTab = () => {
   useEffect(() => {
     fetchCompetitions();
     fetchMatches();
-
-    // Subscribe to realtime updates for live matches
-    const channel = supabase
-      .channel('public-matches')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'matches',
-          filter: 'status=eq.live'
-        },
-        () => {
-          fetchMatches();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   useEffect(() => {
     fetchMatches();
-  }, [selectedCompetition]);
+  }, [selectedCompetition, statusFilter]);
 
   const fetchCompetitions = async () => {
     try {
@@ -92,6 +148,15 @@ export const PublicMatchesTab = () => {
         query = query.eq("competition_id", selectedCompetition);
       }
 
+      // Apply match status filter based on competition status filter
+      if (statusFilter === "ongoing") {
+        query = query.in("status", ["live", "scheduled"]);
+      } else if (statusFilter === "finished") {
+        query = query.eq("status", "finished");
+      } else if (statusFilter === "upcoming") {
+        query = query.eq("status", "scheduled");
+      }
+
       const { data, error } = await query;
 
       if (error) {
@@ -109,23 +174,8 @@ export const PublicMatchesTab = () => {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: any; label: string; className?: string }> = {
-      scheduled: { variant: "outline", label: "Dijadwalkan" },
-      live: { variant: "default", label: "🔴 LIVE", className: "animate-pulse" },
-      finished: { variant: "secondary", label: "Selesai" },
-      postponed: { variant: "destructive", label: "Ditunda" },
-      cancelled: { variant: "destructive", label: "Dibatalkan" },
-    };
-    const config = variants[status] || { variant: "outline", label: status };
-    return <Badge variant={config.variant} className={config.className}>{config.label}</Badge>;
-  };
-
   const liveMatches = matches.filter(m => m.status === "live");
   const otherMatches = matches.filter(m => m.status !== "live");
-  const filteredCompetitions = statusFilter === 'all' 
-    ? competitions 
-    : competitions.filter(c => c.status === statusFilter);
 
   if (loading) {
     return (
@@ -140,7 +190,7 @@ export const PublicMatchesTab = () => {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-primary" />
@@ -150,28 +200,33 @@ export const PublicMatchesTab = () => {
             </div>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
               <Select value={selectedCompetition} onValueChange={setSelectedCompetition}>
-                <SelectTrigger className="w-[300px]">
+                <SelectTrigger className="w-full sm:w-[250px]">
                   <SelectValue placeholder="Semua kompetisi" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Semua Kompetisi</SelectItem>
-                  {filteredCompetitions.map((comp) => (
+                  {competitions.map((comp) => (
                     <SelectItem key={comp.id} value={comp.id}>
                       {comp.name} ({comp.season})
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <div className="flex gap-1">
-                {['all', 'ongoing', 'upcoming', 'finished'].map((s) => (
+              <div className="flex gap-1 flex-wrap">
+                {[
+                  { key: 'all', label: 'Semua' },
+                  { key: 'ongoing', label: 'Berjalan' },
+                  { key: 'upcoming', label: 'Akan Datang' },
+                  { key: 'finished', label: 'Selesai' },
+                ].map((s) => (
                   <Button
-                    key={s}
-                    variant={statusFilter === s ? "default" : "outline"}
+                    key={s.key}
+                    variant={statusFilter === s.key ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setStatusFilter(s)}
-                    className="capitalize text-xs"
+                    onClick={() => setStatusFilter(s.key)}
+                    className="text-xs"
                   >
-                    {s === 'all' ? 'Semua' : s === 'ongoing' ? 'Berjalan' : s === 'upcoming' ? 'Akan Datang' : 'Selesai'}
+                    {s.label}
                   </Button>
                 ))}
               </div>
@@ -191,125 +246,19 @@ export const PublicMatchesTab = () => {
             </p>
           ) : (
             <div className="space-y-4">
-              {/* Live Matches Section */}
               {liveMatches.length > 0 && (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <h3 className="text-lg font-semibold flex items-center gap-2">
                     🔴 Pertandingan Live
                   </h3>
                   {liveMatches.map((match) => (
-                    <Card key={match.id} className="hover:shadow-md transition-shadow border-primary">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-medium text-muted-foreground">
-                                {match.competition.name}
-                              </span>
-                              {getStatusBadge(match.status)}
-                            </div>
-                            <div className="text-sm text-muted-foreground mb-3">
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-3 w-3" />
-                                {format(new Date(match.match_date), "EEEE, d MMMM yyyy - HH:mm", { locale: id })} WIB
-                              </div>
-                              {match.venue && (
-                                <div className="flex items-center gap-2 mt-1">
-                                  <MapPin className="h-3 w-3" />
-                                  {match.venue}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-6">
-                            <Link to={`/public/clubs/${match.home_club.id}`} className="flex items-center gap-3 min-w-[200px] hover:opacity-80">
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage src={match.home_club.logo_url || ""} alt={match.home_club.name} />
-                                <AvatarFallback>{match.home_club.name.substring(0, 2)}</AvatarFallback>
-                              </Avatar>
-                              <span className="font-medium flex-1">{match.home_club.name}</span>
-                            </Link>
-                            
-                            <div className="text-center min-w-[80px]">
-                              <div className="text-2xl font-bold">
-                                {match.home_score} - {match.away_score}
-                              </div>
-                            </div>
-                            
-                            <Link to={`/public/clubs/${match.away_club.id}`} className="flex items-center gap-3 min-w-[200px] hover:opacity-80">
-                              <span className="font-medium flex-1 text-right">{match.away_club.name}</span>
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage src={match.away_club.logo_url || ""} alt={match.away_club.name} />
-                                <AvatarFallback>{match.away_club.name.substring(0, 2)}</AvatarFallback>
-                              </Avatar>
-                            </Link>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <MatchCard key={match.id} match={match} isLive />
                   ))}
                 </div>
               )}
 
-              {/* Other Matches */}
               {otherMatches.map((match) => (
-                <Card key={match.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-muted-foreground">
-                            {match.competition.name}
-                          </span>
-                          {getStatusBadge(match.status)}
-                        </div>
-                        <div className="text-sm text-muted-foreground mb-3">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-3 w-3" />
-                            {format(new Date(match.match_date), "EEEE, d MMMM yyyy - HH:mm", { locale: id })} WIB
-                          </div>
-                          {match.venue && (
-                            <div className="flex items-center gap-2 mt-1">
-                              <MapPin className="h-3 w-3" />
-                              {match.venue}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-6">
-                        <Link to={`/public/clubs/${match.home_club.id}`} className="flex items-center gap-3 min-w-[200px] hover:opacity-80">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={match.home_club.logo_url || ""} alt={match.home_club.name} />
-                            <AvatarFallback>{match.home_club.name.substring(0, 2)}</AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium flex-1">{match.home_club.name}</span>
-                        </Link>
-                        
-                        <div className="text-center min-w-[80px]">
-                          {match.status === "finished" ? (
-                            <div className="text-2xl font-bold">
-                              {match.home_score} - {match.away_score}
-                            </div>
-                          ) : (
-                            <div className="text-xl font-medium text-muted-foreground">
-                              vs
-                            </div>
-                          )}
-                        </div>
-                        
-                        <Link to={`/public/clubs/${match.away_club.id}`} className="flex items-center gap-3 min-w-[200px] hover:opacity-80">
-                          <span className="font-medium flex-1 text-right">{match.away_club.name}</span>
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={match.away_club.logo_url || ""} alt={match.away_club.name} />
-                            <AvatarFallback>{match.away_club.name.substring(0, 2)}</AvatarFallback>
-                          </Avatar>
-                        </Link>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <MatchCard key={match.id} match={match} />
               ))}
             </div>
           )}

@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Trophy, LogIn } from "lucide-react";
+import { Trophy, LogIn, Ticket } from "lucide-react";
 import { PublicGlobalSearch } from "./PublicGlobalSearch";
 
 export const PublicNav = () => {
@@ -20,6 +20,10 @@ export const PublicNav = () => {
           <div className="flex items-center gap-2 shrink-0">
             <Button variant="ghost" size="sm" onClick={() => navigate("/public")} className="hidden sm:inline-flex">
               Beranda
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/public/tickets")} className="hidden sm:inline-flex">
+              <Ticket className="mr-1 h-4 w-4" />
+              Tiket
             </Button>
             <Button size="sm" onClick={() => navigate("/auth")}>
               <LogIn className="mr-2 h-4 w-4" />
