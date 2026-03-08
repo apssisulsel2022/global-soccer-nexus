@@ -1,6 +1,9 @@
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { InfoIcon, Baby } from "lucide-react";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 
 interface CompetitionInfoTabProps {
   competition: any;
@@ -85,6 +88,45 @@ export const CompetitionInfoTab = ({ competition }: CompetitionInfoTabProps) => 
           </AlertDescription>
         </Alert>
       </Card>
+
+      {competition.age_group && competition.age_group !== "none" && (
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Baby className="h-5 w-5" /> Batasan Usia Pemain
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-lg bg-muted/50">
+              <p className="text-sm text-muted-foreground">Kategori</p>
+              <Badge className="mt-1 bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 border-0 text-base">
+                {competition.age_group}
+              </Badge>
+            </div>
+            <div className="p-4 rounded-lg bg-muted/50">
+              <p className="text-sm text-muted-foreground">Usia Maksimal</p>
+              <p className="font-semibold text-lg mt-1">
+                {competition.age_group === "U-15" && "14 tahun"}
+                {competition.age_group === "U-17" && "16 tahun"}
+                {competition.age_group === "U-20" && "19 tahun"}
+                {competition.age_group === "U-23" && "22 tahun"}
+              </p>
+            </div>
+            <div className="p-4 rounded-lg bg-muted/50">
+              <p className="text-sm text-muted-foreground">Tanggal Cutoff</p>
+              <p className="font-semibold text-lg mt-1">
+                {competition.age_cutoff_date
+                  ? format(new Date(competition.age_cutoff_date), "d MMM yyyy", { locale: id })
+                  : format(new Date(competition.start_date), "d MMM yyyy", { locale: id }) + " (default)"}
+              </p>
+            </div>
+          </div>
+          <Alert className="mt-4">
+            <InfoIcon className="h-4 w-4" />
+            <AlertDescription>
+              <p className="text-sm">Pemain yang melebihi batas usia pada tanggal cutoff tidak dapat didaftarkan ke kompetisi ini. Verifikasi usia dilakukan otomatis saat pendaftaran pemain.</p>
+            </AlertDescription>
+          </Alert>
+        </Card>
+      )}
 
       {promotionRules && (
         <Card className="p-6">
