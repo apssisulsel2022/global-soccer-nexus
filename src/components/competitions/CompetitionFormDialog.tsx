@@ -351,7 +351,8 @@ export const CompetitionFormDialog = ({ open, onOpenChange, competition, onSucce
               </div>
             </div>
 
-
+            <div className="space-y-4">
+              <h3 className="font-semibold text-sm">Jadwal</h3>
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
