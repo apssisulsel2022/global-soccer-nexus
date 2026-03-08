@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, UserCheck } from "lucide-react";
+import { getAgeCategory, getAgeCategoryColor, calculateAge } from "@/lib/age-verification";
 import {
   Table,
   TableBody,
@@ -85,16 +86,7 @@ export const PlayersTable = ({ players, onRefresh }: PlayersTableProps) => {
     }
   };
 
-  const calculateAge = (dateOfBirth: string) => {
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
-  };
+  // calculateAge is now imported from age-verification.ts
 
   const totalPages = Math.ceil(players.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -175,7 +167,12 @@ export const PlayersTable = ({ players, onRefresh }: PlayersTableProps) => {
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">{player.nationality}</TableCell>
                   <TableCell className="hidden xl:table-cell">
-                    {calculateAge(player.date_of_birth)} tahun
+                    <span className="flex items-center gap-1.5">
+                      {calculateAge(player.date_of_birth)} thn
+                      <span className={`text-xs px-1.5 py-0.5 rounded ${getAgeCategoryColor(getAgeCategory(player.date_of_birth))}`}>
+                        {getAgeCategory(player.date_of_birth)}
+                      </span>
+                    </span>
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     <Badge variant={getInjuryColor(player.injury_status)}>

@@ -26,8 +26,12 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { checkAgeEligibility, getAgeCategory, getAgeCategoryColor } from "@/lib/age-verification";
+import { AlertTriangle, CheckCircle } from "lucide-react";
 
 const registrationSchema = z.object({
   player_id: z.string().min(1, "Pilih pemain"),
@@ -54,7 +58,13 @@ export default function PlayerRegistrationFormDialog({
   onSuccess,
 }: PlayerRegistrationFormDialogProps) {
   const [players, setPlayers] = useState<any[]>([]);
+  const [competition, setCompetition] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [selectedPlayerEligibility, setSelectedPlayerEligibility] = useState<{
+    eligible: boolean;
+    message: string;
+    category: string;
+  } | null>(null);
 
   const form = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
@@ -67,6 +77,7 @@ export default function PlayerRegistrationFormDialog({
   useEffect(() => {
     if (open) {
       fetchPlayers();
+      fetchCompetition();
       if (registration) {
         form.reset({
           player_id: registration.player_id,
@@ -77,9 +88,19 @@ export default function PlayerRegistrationFormDialog({
           player_id: "",
           shirt_number: 1,
         });
+        setSelectedPlayerEligibility(null);
       }
     }
   }, [open, registration]);
+
+  const fetchCompetition = async () => {
+    const { data } = await supabase
+      .from("competitions")
+      .select("age_group, age_cutoff_date, start_date")
+      .eq("id", competitionId)
+      .maybeSingle();
+    setCompetition(data);
+  };
 
   const fetchPlayers = async () => {
     try {
@@ -115,7 +136,36 @@ export default function PlayerRegistrationFormDialog({
     }
   };
 
+  // Check eligibility when player selection changes
+  const handlePlayerChange = (playerId: string, onChange: (v: string) => void) => {
+    onChange(playerId);
+    const player = players.find((p) => p.id === playerId);
+    if (player && competition?.age_group && competition.age_group !== "none") {
+      const result = checkAgeEligibility(
+        player.date_of_birth,
+        competition.age_group,
+        competition.age_cutoff_date || competition.start_date
+      );
+      setSelectedPlayerEligibility(result);
+    } else if (player) {
+      const category = getAgeCategory(player.date_of_birth);
+      setSelectedPlayerEligibility({
+        eligible: true,
+        message: `Usia pemain: kategori ${category}`,
+        category,
+      });
+    } else {
+      setSelectedPlayerEligibility(null);
+    }
+  };
+
   const onSubmit = async (data: RegistrationFormData) => {
+    // Block submission if player is not eligible
+    if (selectedPlayerEligibility && !selectedPlayerEligibility.eligible) {
+      toast.error("Pemain tidak memenuhi syarat usia untuk kompetisi ini");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -168,6 +218,11 @@ export default function PlayerRegistrationFormDialog({
           </DialogTitle>
           <DialogDescription>
             Daftarkan pemain klub ke kompetisi dengan nomor punggung yang ditentukan
+            {competition?.age_group && competition.age_group !== "none" && (
+              <Badge variant="outline" className="ml-2 text-xs">
+                {competition.age_group}
+              </Badge>
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -179,20 +234,43 @@ export default function PlayerRegistrationFormDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Pemain</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={(v) => handlePlayerChange(v, field.onChange)} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Pilih pemain" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {players.map((player) => (
-                        <SelectItem key={player.id} value={player.id}>
-                          {player.full_name} - {player.position}
-                        </SelectItem>
-                      ))}
+                      {players.map((player) => {
+                        const category = getAgeCategory(player.date_of_birth);
+                        const colorClass = getAgeCategoryColor(category);
+                        return (
+                          <SelectItem key={player.id} value={player.id}>
+                            <span className="flex items-center gap-2">
+                              {player.full_name} - {player.position}
+                              <span className={`text-xs px-1.5 py-0.5 rounded ${colorClass}`}>
+                                {category}
+                              </span>
+                            </span>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
+                  {selectedPlayerEligibility && (
+                    <Alert variant={selectedPlayerEligibility.eligible ? "default" : "destructive"} className="mt-2 py-2">
+                      <div className="flex items-center gap-2">
+                        {selectedPlayerEligibility.eligible ? (
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <AlertTriangle className="h-4 w-4" />
+                        )}
+                        <AlertDescription className="text-sm">
+                          {selectedPlayerEligibility.message}
+                        </AlertDescription>
+                      </div>
+                    </Alert>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -224,7 +302,7 @@ export default function PlayerRegistrationFormDialog({
               >
                 Batal
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading || (selectedPlayerEligibility !== null && !selectedPlayerEligibility.eligible)}>
                 {loading ? "Menyimpan..." : "Simpan"}
               </Button>
             </div>
