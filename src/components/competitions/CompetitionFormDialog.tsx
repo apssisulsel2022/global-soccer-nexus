@@ -95,6 +95,8 @@ export const CompetitionFormDialog = ({ open, onOpenChange, competition, onSucce
         num_groups: data.num_groups ? parseInt(data.num_groups) : null,
         description: data.description || null,
         status: data.status || "upcoming",
+        age_group: data.age_group || null,
+        age_cutoff_date: data.age_cutoff_date || null,
       };
 
       if (competition) {
