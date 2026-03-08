@@ -49,7 +49,7 @@ export const PublicLiveMatchesTab = () => {
           away_club:clubs!away_club_id(id, name, logo_url, short_name),
           competition:competitions(id, name)
         `)
-        .in("status", ["live", "first_half", "half_time", "second_half"])
+        .in("status", ["live", "first_half", "half_time", "second_half", "extra_first_half", "extra_half_time", "extra_second_half", "penalty_shootout"])
         .order("match_date", { ascending: true });
 
       if (error) throw error;
@@ -104,9 +104,9 @@ export const PublicLiveMatchesTab = () => {
               <span className="text-xs font-medium text-muted-foreground truncate">
                 {match.competition?.name}
               </span>
-              <Badge variant="destructive" className={`text-xs gap-1 ${match.status === "half_time" ? "" : "animate-pulse"}`}>
+              <Badge variant="destructive" className={`text-xs gap-1 ${["half_time", "extra_half_time"].includes(match.status) ? "" : "animate-pulse"}`}>
                 <span className="w-1.5 h-1.5 bg-white rounded-full" />
-                {match.status === "first_half" ? "BABAK 1" : match.status === "half_time" ? "ISTIRAHAT" : match.status === "second_half" ? "BABAK 2" : "LIVE"}
+                {match.status === "first_half" ? "BABAK 1" : match.status === "half_time" ? "ISTIRAHAT" : match.status === "second_half" ? "BABAK 2" : match.status === "extra_first_half" ? "ET BABAK 1" : match.status === "extra_half_time" ? "ISTIRAHAT ET" : match.status === "extra_second_half" ? "ET BABAK 2" : match.status === "penalty_shootout" ? "ADU PENALTI" : "LIVE"}
               </Badge>
             </div>
           </CardHeader>

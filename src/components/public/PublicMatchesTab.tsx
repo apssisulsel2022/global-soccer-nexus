@@ -19,6 +19,10 @@ const MatchCard = ({ match, isLive = false }: { match: any; isLive?: boolean }) 
       first_half: { variant: "default", label: "⚽ Babak 1", className: "animate-pulse" },
       half_time: { variant: "outline", label: "☕ Istirahat" },
       second_half: { variant: "default", label: "⚽ Babak 2", className: "animate-pulse" },
+      extra_first_half: { variant: "default", label: "⏱️ ET Babak 1", className: "animate-pulse" },
+      extra_half_time: { variant: "outline", label: "☕ Istirahat ET" },
+      extra_second_half: { variant: "default", label: "⏱️ ET Babak 2", className: "animate-pulse" },
+      penalty_shootout: { variant: "default", label: "🎯 Adu Penalti", className: "animate-pulse" },
       live: { variant: "default", label: "🔴 LIVE", className: "animate-pulse" },
       finished: { variant: "secondary", label: "Selesai" },
       postponed: { variant: "destructive", label: "Ditunda" },
@@ -68,7 +72,7 @@ const MatchCard = ({ match, isLive = false }: { match: any; isLive?: boolean }) 
           </Link>
           
           <div className="text-center shrink-0 min-w-[60px]">
-            {["finished", "live", "first_half", "half_time", "second_half"].includes(match.status) ? (
+            {["finished", "live", "first_half", "half_time", "second_half", "extra_first_half", "extra_half_time", "extra_second_half", "penalty_shootout"].includes(match.status) ? (
               <div className="text-xl sm:text-2xl font-bold">
                 {match.home_score} - {match.away_score}
               </div>
