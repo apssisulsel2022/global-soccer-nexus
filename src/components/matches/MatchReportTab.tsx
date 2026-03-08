@@ -30,7 +30,7 @@ export const MatchReportTab = ({ match }: MatchReportTabProps) => {
       const [eventsData, statsData] = await Promise.all([
         supabase
           .from("match_events")
-          .select("*, player:players(full_name), club:clubs(name)")
+          .select("*, player:players!match_events_player_id_fkey(full_name), club:clubs(name)")
           .eq("match_id", match.id)
           .order("minute"),
         supabase
