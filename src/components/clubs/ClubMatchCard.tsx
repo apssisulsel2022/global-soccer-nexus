@@ -19,12 +19,15 @@ export const ClubMatchCard = ({ match, clubId, onManage }: ClubMatchCardProps) =
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case "first_half":
+      case "second_half":
       case "live":
         return "destructive";
+      case "half_time":
+        return "outline";
       case "finished":
         return "secondary";
       case "postponed":
-        return "outline";
       case "cancelled":
         return "outline";
       default:
@@ -34,18 +37,15 @@ export const ClubMatchCard = ({ match, clubId, onManage }: ClubMatchCardProps) =
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "live":
-        return "LIVE";
-      case "finished":
-        return "Selesai";
-      case "scheduled":
-        return "Dijadwalkan";
-      case "postponed":
-        return "Ditunda";
-      case "cancelled":
-        return "Dibatalkan";
-      default:
-        return status;
+      case "first_half": return "Babak 1";
+      case "half_time": return "Istirahat";
+      case "second_half": return "Babak 2";
+      case "live": return "LIVE";
+      case "finished": return "Selesai";
+      case "scheduled": return "Dijadwalkan";
+      case "postponed": return "Ditunda";
+      case "cancelled": return "Dibatalkan";
+      default: return status;
     }
   };
 
