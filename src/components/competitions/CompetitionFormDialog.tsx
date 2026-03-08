@@ -73,6 +73,8 @@ export const CompetitionFormDialog = ({ open, onOpenChange, competition, onSucce
         num_groups: competition.num_groups?.toString() || "",
         description: competition.description || "",
         status: competition.status || "upcoming",
+        age_group: competition.age_group || "",
+        age_cutoff_date: competition.age_cutoff_date || "",
       });
     }
   }, [competition]);
