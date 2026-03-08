@@ -16,6 +16,9 @@ const MatchCard = ({ match, isLive = false }: { match: any; isLive?: boolean }) 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: any; label: string; className?: string }> = {
       scheduled: { variant: "outline", label: "Dijadwalkan" },
+      first_half: { variant: "default", label: "⚽ Babak 1", className: "animate-pulse" },
+      half_time: { variant: "outline", label: "☕ Istirahat" },
+      second_half: { variant: "default", label: "⚽ Babak 2", className: "animate-pulse" },
       live: { variant: "default", label: "🔴 LIVE", className: "animate-pulse" },
       finished: { variant: "secondary", label: "Selesai" },
       postponed: { variant: "destructive", label: "Ditunda" },
