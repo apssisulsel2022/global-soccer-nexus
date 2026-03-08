@@ -86,16 +86,7 @@ export const PlayersTable = ({ players, onRefresh }: PlayersTableProps) => {
     }
   };
 
-  const calculateAge = (dateOfBirth: string) => {
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
-  };
+  // calculateAge is now imported from age-verification.ts
 
   const totalPages = Math.ceil(players.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
