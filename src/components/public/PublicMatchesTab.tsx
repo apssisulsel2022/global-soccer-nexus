@@ -153,7 +153,7 @@ export const PublicMatchesTab = () => {
 
       // Apply match status filter based on competition status filter
       if (statusFilter === "ongoing") {
-        query = query.in("status", ["live", "scheduled"]);
+        query = query.in("status", ["live", "first_half", "half_time", "second_half", "scheduled"]);
       } else if (statusFilter === "finished") {
         query = query.eq("status", "finished");
       } else if (statusFilter === "upcoming") {
