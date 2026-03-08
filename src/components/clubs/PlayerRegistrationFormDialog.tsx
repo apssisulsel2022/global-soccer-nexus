@@ -136,7 +136,36 @@ export default function PlayerRegistrationFormDialog({
     }
   };
 
+  // Check eligibility when player selection changes
+  const handlePlayerChange = (playerId: string, onChange: (v: string) => void) => {
+    onChange(playerId);
+    const player = players.find((p) => p.id === playerId);
+    if (player && competition?.age_group && competition.age_group !== "none") {
+      const result = checkAgeEligibility(
+        player.date_of_birth,
+        competition.age_group,
+        competition.age_cutoff_date || competition.start_date
+      );
+      setSelectedPlayerEligibility(result);
+    } else if (player) {
+      const category = getAgeCategory(player.date_of_birth);
+      setSelectedPlayerEligibility({
+        eligible: true,
+        message: `Usia pemain: kategori ${category}`,
+        category,
+      });
+    } else {
+      setSelectedPlayerEligibility(null);
+    }
+  };
+
   const onSubmit = async (data: RegistrationFormData) => {
+    // Block submission if player is not eligible
+    if (selectedPlayerEligibility && !selectedPlayerEligibility.eligible) {
+      toast.error("Pemain tidak memenuhi syarat usia untuk kompetisi ini");
+      return;
+    }
+
     try {
       setLoading(true);
 
