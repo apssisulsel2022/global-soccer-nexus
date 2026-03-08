@@ -16,6 +16,9 @@ const MatchCard = ({ match, isLive = false }: { match: any; isLive?: boolean }) 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: any; label: string; className?: string }> = {
       scheduled: { variant: "outline", label: "Dijadwalkan" },
+      first_half: { variant: "default", label: "⚽ Babak 1", className: "animate-pulse" },
+      half_time: { variant: "outline", label: "☕ Istirahat" },
+      second_half: { variant: "default", label: "⚽ Babak 2", className: "animate-pulse" },
       live: { variant: "default", label: "🔴 LIVE", className: "animate-pulse" },
       finished: { variant: "secondary", label: "Selesai" },
       postponed: { variant: "destructive", label: "Ditunda" },
@@ -65,7 +68,7 @@ const MatchCard = ({ match, isLive = false }: { match: any; isLive?: boolean }) 
           </Link>
           
           <div className="text-center shrink-0 min-w-[60px]">
-            {match.status === "finished" || match.status === "live" ? (
+            {["finished", "live", "first_half", "half_time", "second_half"].includes(match.status) ? (
               <div className="text-xl sm:text-2xl font-bold">
                 {match.home_score} - {match.away_score}
               </div>
@@ -150,7 +153,7 @@ export const PublicMatchesTab = () => {
 
       // Apply match status filter based on competition status filter
       if (statusFilter === "ongoing") {
-        query = query.in("status", ["live", "scheduled"]);
+        query = query.in("status", ["live", "first_half", "half_time", "second_half", "scheduled"]);
       } else if (statusFilter === "finished") {
         query = query.eq("status", "finished");
       } else if (statusFilter === "upcoming") {
@@ -174,8 +177,8 @@ export const PublicMatchesTab = () => {
     }
   };
 
-  const liveMatches = matches.filter(m => m.status === "live");
-  const otherMatches = matches.filter(m => m.status !== "live");
+  const liveMatches = matches.filter(m => ["live", "first_half", "half_time", "second_half"].includes(m.status));
+  const otherMatches = matches.filter(m => !["live", "first_half", "half_time", "second_half"].includes(m.status));
 
   if (loading) {
     return (

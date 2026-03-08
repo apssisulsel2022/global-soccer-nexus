@@ -2319,6 +2319,9 @@ export type Database = {
         | "finished"
         | "postponed"
         | "cancelled"
+        | "first_half"
+        | "half_time"
+        | "second_half"
       player_position: "GK" | "DF" | "MF" | "FW"
       player_status: "fit" | "cedera" | "pemulihan"
     }
@@ -2457,7 +2460,16 @@ export const Constants = {
         "swiss_system",
       ],
       competition_type: ["liga", "piala", "youth_league"],
-      match_status: ["scheduled", "live", "finished", "postponed", "cancelled"],
+      match_status: [
+        "scheduled",
+        "live",
+        "finished",
+        "postponed",
+        "cancelled",
+        "first_half",
+        "half_time",
+        "second_half",
+      ],
       player_position: ["GK", "DF", "MF", "FW"],
       player_status: ["fit", "cedera", "pemulihan"],
     },

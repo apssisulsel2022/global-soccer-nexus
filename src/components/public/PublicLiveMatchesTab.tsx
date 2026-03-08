@@ -22,7 +22,6 @@ export const PublicLiveMatchesTab = () => {
           event: '*',
           schema: 'public',
           table: 'matches',
-          filter: 'status=eq.live'
         },
         () => {
           fetchLiveMatches();
@@ -50,7 +49,7 @@ export const PublicLiveMatchesTab = () => {
           away_club:clubs!away_club_id(id, name, logo_url, short_name),
           competition:competitions(id, name)
         `)
-        .eq("status", "live")
+        .in("status", ["live", "first_half", "half_time", "second_half"])
         .order("match_date", { ascending: true });
 
       if (error) throw error;
@@ -105,9 +104,9 @@ export const PublicLiveMatchesTab = () => {
               <span className="text-xs font-medium text-muted-foreground truncate">
                 {match.competition?.name}
               </span>
-              <Badge variant="destructive" className="animate-pulse text-xs gap-1">
+              <Badge variant="destructive" className={`text-xs gap-1 ${match.status === "half_time" ? "" : "animate-pulse"}`}>
                 <span className="w-1.5 h-1.5 bg-white rounded-full" />
-                LIVE
+                {match.status === "first_half" ? "BABAK 1" : match.status === "half_time" ? "ISTIRAHAT" : match.status === "second_half" ? "BABAK 2" : "LIVE"}
               </Badge>
             </div>
           </CardHeader>
