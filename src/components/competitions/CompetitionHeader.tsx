@@ -68,6 +68,11 @@ export const CompetitionHeader = ({ competition }: CompetitionHeaderProps) => {
               <Badge variant="outline">{getTypeLabel(competition.type)}</Badge>
               <Badge variant="outline">{getFormatLabel(competition.format)}</Badge>
               <Badge variant="outline">Musim {competition.season}</Badge>
+              {competition.age_group && competition.age_group !== "none" && (
+                <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 border-0">
+                  👶 {competition.age_group}
+                </Badge>
+              )}
             </div>
           </div>
 
