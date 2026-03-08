@@ -1,6 +1,9 @@
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { InfoIcon, Baby } from "lucide-react";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 
 interface CompetitionInfoTabProps {
   competition: any;
