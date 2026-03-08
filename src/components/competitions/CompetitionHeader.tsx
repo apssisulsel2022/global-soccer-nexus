@@ -115,6 +115,20 @@ export const CompetitionHeader = ({ competition }: CompetitionHeaderProps) => {
                 </div>
               </div>
             )}
+            {competition.age_group && competition.age_group !== "none" && (
+              <div className="flex items-center gap-2">
+                <Baby className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Kategori Usia</p>
+                  <p className="font-semibold">{competition.age_group}</p>
+                  {competition.age_cutoff_date && (
+                    <p className="text-xs text-muted-foreground">
+                      Cutoff: {format(new Date(competition.age_cutoff_date), "d MMM yyyy", { locale: id })}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
