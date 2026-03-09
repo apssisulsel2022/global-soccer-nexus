@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 
 const Matches = () => {
   const navigate = useNavigate();
@@ -17,26 +19,28 @@ const Matches = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  const pagination = usePagination({ pageSize: 30 });
 
   useEffect(() => {
     fetchMatches();
-  }, []);
+  }, [pagination.page]);
 
   const fetchMatches = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error, count } = await supabase
         .from("matches")
         .select(`
           *,
           competition:competitions(name, type),
           home_club:clubs!matches_home_club_id_fkey(name, logo_url),
           away_club:clubs!matches_away_club_id_fkey(name, logo_url)
-        `)
+        `, { count: "exact" })
         .order("match_date", { ascending: false })
-        .limit(50);
+        .range(pagination.from, pagination.to);
 
       if (error) throw error;
       setMatches(data || []);
+      pagination.setTotalCount(count || 0);
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -56,7 +60,14 @@ const Matches = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case "first_half":
+      case "second_half":
+      case "extra_first_half":
+      case "extra_second_half":
+      case "penalty_shootout":
       case "live": return "destructive";
+      case "half_time":
+      case "extra_half_time": return "secondary";
       case "finished": return "default";
       case "scheduled": return "secondary";
       default: return "outline";
@@ -65,6 +76,13 @@ const Matches = () => {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
+      case "first_half": return "⚽ BABAK 1";
+      case "half_time": return "☕ HT";
+      case "second_half": return "⚽ BABAK 2";
+      case "extra_first_half": return "⏱️ ET 1";
+      case "extra_half_time": return "☕ ET HT";
+      case "extra_second_half": return "⏱️ ET 2";
+      case "penalty_shootout": return "🎯 PENALTI";
       case "live": return "LIVE";
       case "finished": return "Selesai";
       case "scheduled": return "Dijadwalkan";
@@ -169,6 +187,20 @@ const Matches = () => {
           ))}
         </div>
       )}
+      
+      <PaginationControls
+        page={pagination.page}
+        totalPages={pagination.totalPages}
+        totalCount={pagination.totalCount}
+        hasNext={pagination.hasNext}
+        hasPrev={pagination.hasPrev}
+        onNext={pagination.nextPage}
+        onPrev={pagination.prevPage}
+        onFirst={() => pagination.setPage(1)}
+        onLast={() => pagination.setPage(pagination.totalPages)}
+        from={pagination.from}
+        pageSize={pagination.pageSize}
+      />
     </div>
   );
 };

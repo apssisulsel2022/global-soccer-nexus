@@ -24,6 +24,8 @@ const competitionSchema = z.object({
   num_groups: z.string().optional(),
   description: z.string().optional(),
   status: z.string().optional(),
+  age_group: z.string().optional(),
+  age_cutoff_date: z.string().optional(),
 });
 
 type CompetitionFormData = z.infer<typeof competitionSchema>;
@@ -53,6 +55,8 @@ export const CompetitionFormDialog = ({ open, onOpenChange, competition, onSucce
       num_groups: "",
       description: "",
       status: "upcoming",
+      age_group: "",
+      age_cutoff_date: "",
     },
   });
 
@@ -69,6 +73,8 @@ export const CompetitionFormDialog = ({ open, onOpenChange, competition, onSucce
         num_groups: competition.num_groups?.toString() || "",
         description: competition.description || "",
         status: competition.status || "upcoming",
+        age_group: competition.age_group || "",
+        age_cutoff_date: competition.age_cutoff_date || "",
       });
     }
   }, [competition]);
@@ -89,6 +95,8 @@ export const CompetitionFormDialog = ({ open, onOpenChange, competition, onSucce
         num_groups: data.num_groups ? parseInt(data.num_groups) : null,
         description: data.description || null,
         status: data.status || "upcoming",
+        age_group: data.age_group || null,
+        age_cutoff_date: data.age_cutoff_date || null,
       };
 
       if (competition) {
@@ -284,6 +292,57 @@ export const CompetitionFormDialog = ({ open, onOpenChange, competition, onSucce
                           <Input type="number" placeholder="4" {...field} />
                         </FormControl>
                         <FormDescription>AFC Champions League: 4-8 grup</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="font-semibold text-sm">Batasan Usia</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="age_group"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Kelompok Usia</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Tanpa batasan usia" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">Tanpa Batasan (Senior)</SelectItem>
+                          <SelectItem value="U-15">U-15 (Maks 14 tahun)</SelectItem>
+                          <SelectItem value="U-17">U-17 (Maks 16 tahun)</SelectItem>
+                          <SelectItem value="U-20">U-20 (Maks 19 tahun)</SelectItem>
+                          <SelectItem value="U-23">U-23 (Maks 22 tahun)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Pemain yang melebihi batas usia akan ditolak saat pendaftaran
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {form.watch("age_group") && form.watch("age_group") !== "none" && (
+                  <FormField
+                    control={form.control}
+                    name="age_cutoff_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tanggal Cutoff Usia</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Tanggal acuan menghitung usia. Default: tanggal mulai kompetisi.
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}

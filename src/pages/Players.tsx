@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, Upload, UserCheck, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import { PlayersTable } from "@/components/PlayersTable";
 import { PendingPlayersTable } from "@/components/players/PendingPlayersTable";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,6 +52,7 @@ const Players = () => {
   const [clubFilter, setClubFilter] = useState<"all" | "with_club" | "free_agent">("all");
   const { toast } = useToast();
   const { isAdminKlub, isAdminFederasi, clubId } = useUserRole();
+  const pagination = usePagination({ pageSize: 30 });
 
   useEffect(() => {
     // Listen for transfer dialog trigger from PlayerFormDialog
@@ -73,7 +76,7 @@ const Players = () => {
     if (isAdminFederasi) {
       fetchPendingPlayers();
     }
-  }, [isAdminKlub, isAdminFederasi, clubId]);
+  }, [isAdminKlub, isAdminFederasi, clubId, pagination.page]);
 
   const fetchPlayers = async () => {
     try {
@@ -82,22 +85,20 @@ const Players = () => {
         .select(`
           *,
           clubs:current_club_id (name)
-        `)
-        .order("full_name");
+        `, { count: "exact" })
+        .order("full_name")
+        .range(pagination.from, pagination.to);
 
       // For Admin Federasi, only fetch approved players in main tab
       if (isAdminFederasi) {
         query = query.eq("registration_status", "approved");
       }
 
-      // Filter is handled by RLS policies
-      // Admin Klub will only see their approved players + their own registrations
-      // Admin Federasi will see approved players in main tab
-      
-      const { data, error } = await query;
+      const { data, error, count } = await query;
 
       if (error) throw error;
       setPlayers(data || []);
+      pagination.setTotalCount(count || 0);
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -258,7 +259,22 @@ const Players = () => {
                 </div>
               </div>
             ) : (
-              <PlayersTable players={filteredPlayers} onRefresh={handleRefresh} />
+              <>
+                <PlayersTable players={filteredPlayers} onRefresh={handleRefresh} />
+                <PaginationControls
+                  page={pagination.page}
+                  totalPages={pagination.totalPages}
+                  totalCount={pagination.totalCount}
+                  hasNext={pagination.hasNext}
+                  hasPrev={pagination.hasPrev}
+                  onNext={pagination.nextPage}
+                  onPrev={pagination.prevPage}
+                  onFirst={() => pagination.setPage(1)}
+                  onLast={() => pagination.setPage(pagination.totalPages)}
+                  from={pagination.from}
+                  pageSize={pagination.pageSize}
+                />
+              </>
             )}
           </TabsContent>
           
@@ -285,7 +301,22 @@ const Players = () => {
           </div>
         </div>
       ) : (
-        <PlayersTable players={filteredPlayers} onRefresh={handleRefresh} />
+        <>
+          <PlayersTable players={filteredPlayers} onRefresh={handleRefresh} />
+          <PaginationControls
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            totalCount={pagination.totalCount}
+            hasNext={pagination.hasNext}
+            hasPrev={pagination.hasPrev}
+            onNext={pagination.nextPage}
+            onPrev={pagination.prevPage}
+            onFirst={() => pagination.setPage(1)}
+            onLast={() => pagination.setPage(pagination.totalPages)}
+            from={pagination.from}
+            pageSize={pagination.pageSize}
+          />
+        </>
       )}
 
       <PlayerFormDialog

@@ -357,6 +357,8 @@ export type Database = {
       }
       competitions: {
         Row: {
+          age_cutoff_date: string | null
+          age_group: string | null
           approval_status: string
           approved_at: string | null
           approved_by: string | null
@@ -378,6 +380,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          age_cutoff_date?: string | null
+          age_group?: string | null
           approval_status?: string
           approved_at?: string | null
           approved_by?: string | null
@@ -399,6 +403,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          age_cutoff_date?: string | null
+          age_group?: string | null
           approval_status?: string
           approved_at?: string | null
           approved_by?: string | null
@@ -850,6 +856,8 @@ export type Database = {
           away_score: number | null
           competition_id: string
           created_at: string
+          extra_time_away_score: number | null
+          extra_time_home_score: number | null
           fourth_official: string | null
           group_name: string | null
           half_time_away_score: number | null
@@ -860,6 +868,8 @@ export type Database = {
           match_date: string
           match_notes: string | null
           matchday: number | null
+          penalty_away_score: number | null
+          penalty_home_score: number | null
           pitch_condition: string | null
           referee_name: string | null
           round: string | null
@@ -877,6 +887,8 @@ export type Database = {
           away_score?: number | null
           competition_id: string
           created_at?: string
+          extra_time_away_score?: number | null
+          extra_time_home_score?: number | null
           fourth_official?: string | null
           group_name?: string | null
           half_time_away_score?: number | null
@@ -887,6 +899,8 @@ export type Database = {
           match_date: string
           match_notes?: string | null
           matchday?: number | null
+          penalty_away_score?: number | null
+          penalty_home_score?: number | null
           pitch_condition?: string | null
           referee_name?: string | null
           round?: string | null
@@ -904,6 +918,8 @@ export type Database = {
           away_score?: number | null
           competition_id?: string
           created_at?: string
+          extra_time_away_score?: number | null
+          extra_time_home_score?: number | null
           fourth_official?: string | null
           group_name?: string | null
           half_time_away_score?: number | null
@@ -914,6 +930,8 @@ export type Database = {
           match_date?: string
           match_notes?: string | null
           matchday?: number | null
+          penalty_away_score?: number | null
+          penalty_home_score?: number | null
           pitch_condition?: string | null
           referee_name?: string | null
           round?: string | null
@@ -2319,6 +2337,13 @@ export type Database = {
         | "finished"
         | "postponed"
         | "cancelled"
+        | "first_half"
+        | "half_time"
+        | "second_half"
+        | "extra_first_half"
+        | "extra_half_time"
+        | "extra_second_half"
+        | "penalty_shootout"
       player_position: "GK" | "DF" | "MF" | "FW"
       player_status: "fit" | "cedera" | "pemulihan"
     }
@@ -2457,7 +2482,20 @@ export const Constants = {
         "swiss_system",
       ],
       competition_type: ["liga", "piala", "youth_league"],
-      match_status: ["scheduled", "live", "finished", "postponed", "cancelled"],
+      match_status: [
+        "scheduled",
+        "live",
+        "finished",
+        "postponed",
+        "cancelled",
+        "first_half",
+        "half_time",
+        "second_half",
+        "extra_first_half",
+        "extra_half_time",
+        "extra_second_half",
+        "penalty_shootout",
+      ],
       player_position: ["GK", "DF", "MF", "FW"],
       player_status: ["fit", "cedera", "pemulihan"],
     },

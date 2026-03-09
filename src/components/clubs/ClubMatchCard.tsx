@@ -19,12 +19,19 @@ export const ClubMatchCard = ({ match, clubId, onManage }: ClubMatchCardProps) =
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case "first_half":
+      case "second_half":
+      case "extra_first_half":
+      case "extra_second_half":
+      case "penalty_shootout":
       case "live":
         return "destructive";
+      case "half_time":
+      case "extra_half_time":
+        return "outline";
       case "finished":
         return "secondary";
       case "postponed":
-        return "outline";
       case "cancelled":
         return "outline";
       default:
@@ -34,18 +41,19 @@ export const ClubMatchCard = ({ match, clubId, onManage }: ClubMatchCardProps) =
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "live":
-        return "LIVE";
-      case "finished":
-        return "Selesai";
-      case "scheduled":
-        return "Dijadwalkan";
-      case "postponed":
-        return "Ditunda";
-      case "cancelled":
-        return "Dibatalkan";
-      default:
-        return status;
+      case "first_half": return "Babak 1";
+      case "half_time": return "Istirahat";
+      case "second_half": return "Babak 2";
+      case "extra_first_half": return "ET Babak 1";
+      case "extra_half_time": return "Istirahat ET";
+      case "extra_second_half": return "ET Babak 2";
+      case "penalty_shootout": return "Adu Penalti";
+      case "live": return "LIVE";
+      case "finished": return "Selesai";
+      case "scheduled": return "Dijadwalkan";
+      case "postponed": return "Ditunda";
+      case "cancelled": return "Dibatalkan";
+      default: return status;
     }
   };
 
@@ -82,6 +90,16 @@ export const ClubMatchCard = ({ match, clubId, onManage }: ClubMatchCardProps) =
             <div className="text-3xl font-bold">
               {match.home_score ?? "-"} : {match.away_score ?? "-"}
             </div>
+            {match.penalty_home_score !== null && match.penalty_away_score !== null && (
+              <div className="text-sm font-semibold text-amber-600">
+                (Pen: {match.penalty_home_score} - {match.penalty_away_score})
+              </div>
+            )}
+            {match.extra_time_home_score !== null && match.extra_time_away_score !== null && (
+              <div className="text-sm text-muted-foreground">
+                (AET: {match.extra_time_home_score} - {match.extra_time_away_score})
+              </div>
+            )}
             {match.half_time_home_score !== null && (
               <div className="text-sm text-muted-foreground">
                 ({match.half_time_home_score} - {match.half_time_away_score} HT)

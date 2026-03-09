@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Calendar, Users, PlaySquare } from "lucide-react";
+import { Trophy, Calendar, Users, PlaySquare, Baby } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
@@ -68,6 +68,11 @@ export const CompetitionHeader = ({ competition }: CompetitionHeaderProps) => {
               <Badge variant="outline">{getTypeLabel(competition.type)}</Badge>
               <Badge variant="outline">{getFormatLabel(competition.format)}</Badge>
               <Badge variant="outline">Musim {competition.season}</Badge>
+              {competition.age_group && competition.age_group !== "none" && (
+                <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 border-0">
+                  👶 {competition.age_group}
+                </Badge>
+              )}
             </div>
           </div>
 
@@ -107,6 +112,20 @@ export const CompetitionHeader = ({ competition }: CompetitionHeaderProps) => {
                 <div>
                   <p className="text-sm text-muted-foreground">Jumlah Grup</p>
                   <p className="font-semibold">{competition.num_groups} grup</p>
+                </div>
+              </div>
+            )}
+            {competition.age_group && competition.age_group !== "none" && (
+              <div className="flex items-center gap-2">
+                <Baby className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Kategori Usia</p>
+                  <p className="font-semibold">{competition.age_group}</p>
+                  {competition.age_cutoff_date && (
+                    <p className="text-xs text-muted-foreground">
+                      Cutoff: {format(new Date(competition.age_cutoff_date), "d MMM yyyy", { locale: id })}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
